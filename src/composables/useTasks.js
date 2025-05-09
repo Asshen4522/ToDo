@@ -1,0 +1,114 @@
+import { computed, ref, watch } from "vue";
+
+const tasks = ref([])
+try {
+    const localTasks = localStorage.getItem('tasks')
+    if (localTasks) {
+        tasks.value= JSON.parse(localTasks)
+    }
+} catch (error) {}
+watch(tasks,(newValue)=>{
+    localStorage.setItem('tasks',JSON.stringify(newValue))
+},
+{deep:true})
+
+const editTaskId = ref(null)
+
+const newId = computed(()=> {
+    if (!tasks.value.length) {
+        return 0
+    }else{
+        return tasks.value.reduce((acc, curr) => {
+            if (acc.id > curr.id) {
+                return acc
+            } else {
+                return curr
+            }
+        }).id+1;
+    }
+})  
+
+const reqTask = ((reqId)=> tasks.value.find((task)=>task.id===reqId))
+
+function createTask(taskName,taskDate) {
+    tasks.value.push({
+        id:newId.value,
+        name:taskName,
+        exeDate:taskDate,
+        isTimeOut:false,
+        isCompleted:false,
+    })
+}
+
+function toggleTask(taskId) {
+    tasks.value[tasks.value.indexOf(reqTask(taskId))].isCompleted=!tasks.value[tasks.value.indexOf(reqTask(taskId))].isCompleted
+}
+
+function deleteTask(taskId) {
+    tasks.value.splice(tasks.value.indexOf(reqTask(taskId)),1)
+}
+
+function pickForEdit(taskId) {
+    editTaskId.value=taskId
+}
+
+function editTask(taskName,taskDate) {
+    const reqInd= tasks.value.indexOf(reqTask(editTaskId.value))
+    tasks.value[reqInd].name=taskName
+    tasks.value[reqInd].exeDate=taskDate
+}
+
+function sortBy(sortParam) {
+    if (sortParam==='date') {
+        tasks.value.sort(compare)
+    }
+}
+
+function compare(a, b) {
+  if (a.exeDate.split('/')[0] < b.exeDate.split('/')[0]) {
+    return -1;
+  } else if (a.exeDate.split('/')[0] > b.exeDate.split('/')[0]) {
+    return 1;
+  }else if (a.exeDate.split('/')[1] < b.exeDate.split('/')[1]) {
+    return -1;
+  }else if (a.exeDate.split('/')[1] > b.exeDate.split('/')[1]) {
+    return 1;
+  }
+  return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+const timeInterval = ref(null)
+const currentDate = ref(new Date)
+const dateForInput = computed(()=>currentDate.value.getFullYear() + '-' + String(currentDate.value.getMonth() + 1).padStart(2, '0') + '-' + String(currentDate.value.getDate()).padStart(2, '0'))
+const timeForInput = computed(()=>String(currentDate.value.getHours()).padStart(2, '0') + ':' + String(currentDate.value.getMinutes()).padStart(2, '0'))
+
+timeInterval.value = setInterval(() => {
+        currentDate.value = new Date
+    }, 60000);
+
+watch(currentDate,(newVal)=>{
+    console.log(dateForInput.value);
+    console.log(timeForInput.value);
+    
+    
+},
+{deep:true})
+
+
+
+
+export default function useTasks() {
+    return { tasks,editTaskId,reqTask, createTask,toggleTask,deleteTask,pickForEdit,editTask,sortBy}
+}
