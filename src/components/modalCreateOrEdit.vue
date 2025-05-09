@@ -3,14 +3,18 @@ import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import useTasks from '../composables/useTasks'
 import Input from '../elements/Input.vue'
 const taskData = useTasks()
+const pickedTask = taskData.reqTask(taskData.editTaskId.value)
 
 const emit = defineEmits(['close'])
+const props = defineProps({
+    createOrEdit: String
+})
 
 const currentDate = ref(new Date)
 currentDate.value.setHours(currentDate.value.getHours() + 1)
-
 let dateForInput = currentDate.value.getFullYear() + '-' + String(currentDate.value.getMonth() + 1).padStart(2, '0') + '-' + String(currentDate.value.getDate()).padStart(2, '0')
 let timeForInput = String(currentDate.value.getHours()).padStart(2, '0') + ':' + String(currentDate.value.getMinutes()).padStart(2, '0')
+
 
 const timeInterval = ref() //Хранилище интервала
 
@@ -20,6 +24,12 @@ const localInp = reactive({ //Хранилище инпутов
     time: ''
 })
 
+if (props.createOrEdit === 'edit') {
+    localInp.name = pickedTask?.name
+    localInp.date = pickedTask?.exeDate.split('/')[0]
+    localInp.time = pickedTask?.exeDate.split('/')[1]
+}
+
 const errors = reactive({ //Хранилище ошибок
     name: '',
     dateTime: ''
@@ -27,7 +37,12 @@ const errors = reactive({ //Хранилище ошибок
 
 function createTask() { // основная функция создания
     if (checkName() && checkDateTime()) {
-        taskData.createTask(localInp.name, localInp.date + '/' + localInp.time)
+        if (props.createOrEdit === 'edit') {
+            taskData.editTask(localInp.name, localInp.date + '/' + localInp.time)
+            closing.value = true
+        } else if (props.createOrEdit === 'create') {
+            taskData.createTask(localInp.name, localInp.date + '/' + localInp.time)
+        }
         localInp.name = ''
         localInp.date = ''
         localInp.time = ''
@@ -72,7 +87,12 @@ function checkDateTime() { //Подфункция проверки даты и �
 const closing = ref(false) //для анимации исчезновения
 watch(closing, (newVal) => {
     if (newVal) {
-        setTimeout(() => emit('close'), 1000)
+        setTimeout(() => {
+            emit('close')
+            if (props.createOrEdit === 'edit') {
+                taskData.pickForEdit(null)
+            }
+        }, 1000)
     }
 })
 
@@ -97,7 +117,8 @@ onUnmounted(() => { //сброс интервала при закрытии ок
             <div class="icon-container"><img class="icon" src="../assets/cross.svg" alt="Выйти" @click="closing = true">
             </div>
             <div class="mainField">
-                <div>Создание задачи</div>
+                <div v-if="props.createOrEdit === 'create'">Создание задачи</div>
+                <div v-if="props.createOrEdit === 'edit'">Изменение задачи</div>
                 <Input typeIn="text" inputname="Название" v-model="localInp.name" :ifError="errors.name" />
                 <div>{{ errors.name }}</div>
                 <div>
@@ -108,7 +129,8 @@ onUnmounted(() => { //сброс интервала при закрытии ок
                     </div>
                     <div>{{ errors.dateTime }}</div>
                 </div>
-                <button @click="createTask">Создать задачу</button>
+                <button @click="createTask" v-if="props.createOrEdit === 'edit'">Изменить задачу</button>
+                <button @click="createTask" v-if="props.createOrEdit === 'create'">Создать задачу</button>
             </div>
 
         </div>

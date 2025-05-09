@@ -59,12 +59,20 @@ function editTask(taskName,taskDate) {
 }
 
 function sortBy(sortParam) {
+    switch (sortParam) {
+        case 'dateUp':
+            tasks.value.sort(compareDateUp)
+            break;
+         case 'dateDown':
+            tasks.value.sort(compareDateDown)
+            break;
+    }
     if (sortParam==='date') {
-        tasks.value.sort(compare)
+        
     }
 }
 
-function compare(a, b) {
+function compareDateUp(a, b) {
   if (a.exeDate.split('/')[0] < b.exeDate.split('/')[0]) {
     return -1;
   } else if (a.exeDate.split('/')[0] > b.exeDate.split('/')[0]) {
@@ -73,6 +81,18 @@ function compare(a, b) {
     return -1;
   }else if (a.exeDate.split('/')[1] > b.exeDate.split('/')[1]) {
     return 1;
+  }
+  return 0;
+}
+function compareDateDown(a, b) {
+  if (a.exeDate.split('/')[0] < b.exeDate.split('/')[0]) {
+    return 1;
+  } else if (a.exeDate.split('/')[0] > b.exeDate.split('/')[0]) {
+    return -1;
+  }else if (a.exeDate.split('/')[1] < b.exeDate.split('/')[1]) {
+    return 1;
+  }else if (a.exeDate.split('/')[1] > b.exeDate.split('/')[1]) {
+    return -1;
   }
   return 0;
 }
@@ -94,16 +114,27 @@ const currentDate = ref(new Date)
 const dateForInput = computed(()=>currentDate.value.getFullYear() + '-' + String(currentDate.value.getMonth() + 1).padStart(2, '0') + '-' + String(currentDate.value.getDate()).padStart(2, '0'))
 const timeForInput = computed(()=>String(currentDate.value.getHours()).padStart(2, '0') + ':' + String(currentDate.value.getMinutes()).padStart(2, '0'))
 
+function updateDates() {
+    let notFinished = tasks.value.filter((task)=>task.isTimeOut === false)
+    notFinished.forEach(task => {
+        if (!task.isTimeOut) {
+            if (task.exeDate.split('/')[0] < dateForInput.value) {
+                tasks.value[tasks.value.indexOf(reqTask(task.id))].isTimeOut = true
+            }else if(task.exeDate.split('/')[0] === dateForInput.value){
+                if (task.exeDate.split('/')[1] < timeForInput.value) {
+                    tasks.value[tasks.value.indexOf(reqTask(task.id))].isTimeOut = true
+                }
+            }
+        }
+    });
+}
+
+updateDates()
+
 timeInterval.value = setInterval(() => {
         currentDate.value = new Date
     }, 60000);
-
-watch(currentDate,(newVal)=>{
-    console.log(dateForInput.value);
-    console.log(timeForInput.value);
-    
-    
-},
+watch(currentDate,(newVal)=>updateDates(),
 {deep:true})
 
 
