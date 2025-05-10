@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import useTasks from '../composables/useTasks';
 const taskData = useTasks()
-const tasks = computed(() => taskData.tasks)
+const tasks = computed(() => taskData.sortedMass.value)
 </script>
 <template>
     <div class="main">
@@ -14,7 +14,7 @@ const tasks = computed(() => taskData.tasks)
         </div>
         <div class="table">
             <transition-group name="table">
-                <div class="table_line task" v-for="task in tasks.value" :key="task.id">
+                <div class="table_line task" v-for="task in tasks" :key="task.id">
                     <div class="editDelBtn">
                         <div class="icon" @click="taskData.deleteTask(task.id)">&#128465;</div>
                         <div class="icon" @click="taskData.pickForEdit(task.id)">&#9998;</div>

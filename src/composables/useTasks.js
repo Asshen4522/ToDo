@@ -58,7 +58,7 @@ function editTask(taskName,taskDate) {
     tasks.value[reqInd].exeDate=taskDate
 }
 
-function sortBy(sortParam) {
+function sortBy(sortParam) {  
     switch (sortParam) {
         case 'dateUp':
             tasks.value.sort(compareDateUp)
@@ -66,9 +66,17 @@ function sortBy(sortParam) {
          case 'dateDown':
             tasks.value.sort(compareDateDown)
             break;
-    }
-    if (sortParam==='date') {
-        
+        case 'timeOut':
+        case 'notTimeOut':
+        case 'both':
+            selector.value = sortParam           
+            break;
+        case 'IdUp':
+            tasks.value.sort(compareIdUp)
+            break;
+        case 'IdDown':
+            tasks.value.sort(compareIdDown)
+            break;
     }
 }
 
@@ -96,7 +104,40 @@ function compareDateDown(a, b) {
   }
   return 0;
 }
+function compareIdUp(a, b) {
+  if (a.id < b.id) {
+    return -1;
+  } else if (a.id > b.id) {
+    return 1;
+  }
+  return 0;
+}
+function compareIdDown(a, b) {
+  if (a.id < b.id) {
+    return 1;
+  } else if (a.id > b.id) {
+    return -1;
+  }
+  return 0;
+}
 
+
+const selector=ref('both')
+const sortedMass = computed(()=>{
+    let Result = []
+    switch (selector.value) {
+        case 'both':
+            Result = tasks.value
+            break;
+        case 'timeOut':
+            Result = tasks.value.filter((task)=>task.isTimeOut===true)
+            break;
+        case 'notTimeOut':
+            Result = tasks.value.filter((task)=>task.isTimeOut===false)
+            break;
+    }
+    return Result
+})
 
 
 
@@ -129,6 +170,12 @@ function updateDates() {
     });
 }
 
+
+// tasks.value.forEach(task => {
+//     task.isTimeOut=false
+// });
+
+
 updateDates()
 
 timeInterval.value = setInterval(() => {
@@ -141,5 +188,5 @@ watch(currentDate,(newVal)=>updateDates(),
 
 
 export default function useTasks() {
-    return { tasks,editTaskId,reqTask, createTask,toggleTask,deleteTask,pickForEdit,editTask,sortBy}
+    return { tasks,sortedMass,editTaskId,reqTask, createTask,toggleTask,deleteTask,pickForEdit,editTask,sortBy}
 }

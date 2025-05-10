@@ -32,16 +32,30 @@ watch(closing, (newVal) => {
   <div class="sortSpace">
     <button @click="toggleSortView">Скрыть/показать варианты сортировки и фильтрации</button>
     <div v-if="sort" class="sortOptions" :class="{ hideSort: closing }">
-      <button @click="taskData.sortBy('dateUp')">По возрастанию времени</button>
-      <button @click="taskData.sortBy('dateDown')">По убывании времени</button>
-      <!-- <button></button>
-      <button></button>
-      <button></button>
-      <button></button>
-      <button></button>
-      <button></button>
-      <button></button>
-      <button></button> -->
+      <div>
+        <div class="caption"> По порядку создания</div>
+        <div class="buttons">
+          <button @click="taskData.sortBy('IdUp')">&#129033;</button>
+          <button @click="taskData.sortBy('IdDown')">&#129035;</button>
+        </div>
+      </div>
+      <div>
+        <div class="caption"> По времени</div>
+        <div class="buttons">
+          <button @click="taskData.sortBy('dateUp')">&#129033;</button>
+          <button @click="taskData.sortBy('dateDown')">&#129035;</button>
+        </div>
+      </div>
+      <div>
+        <div class="caption"> По дедлайну</div>
+        <div class="buttons dead">
+          <button @click="taskData.sortBy('both')">Все</button>
+          <button @click="taskData.sortBy('timeOut')">Просроченные</button>
+          <button @click="taskData.sortBy('notTimeOut')">Непросроченные</button>
+        </div>
+      </div>
+
+
     </div>
   </div>
   <TableShow />
@@ -51,6 +65,29 @@ watch(closing, (newVal) => {
 </template>
 
 <style scoped>
+.caption {
+  color: var(--color-accent);
+  font-size: larger;
+  font-weight: bold;
+
+  border-radius: 8px;
+  border: 3px solid var(--color-accent);
+  background-color: var(--color-main);
+  margin-bottom: 10px;
+  margin-top: 25%;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.dead {
+  flex-direction: column;
+}
+
 .sortSpace {
   position: fixed;
   left: 50px;
@@ -82,14 +119,14 @@ watch(closing, (newVal) => {
   }
 
   to {
-    height: 200px;
+    height: 700px;
   }
 
 }
 
 @keyframes disappear {
   from {
-    height: 200px;
+    height: 700px;
 
   }
 
