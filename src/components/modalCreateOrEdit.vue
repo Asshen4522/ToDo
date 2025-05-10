@@ -35,8 +35,11 @@ const errors = reactive({ //Хранилище ошибок
     dateTime: ''
 })
 
+
 function createTask() { // основная функция создания
-    if (checkName() && checkDateTime()) {
+    const a = checkDateTime()
+    const b = checkName()
+    if (a && b) {
         if (props.createOrEdit === 'edit') {
             taskData.editTask(localInp.name, localInp.date + '/' + localInp.time)
             closing.value = true
@@ -61,6 +64,7 @@ function checkName() { //Подфункция проверки названия
 }
 
 function checkDateTime() { //Подфункция проверки даты и времени
+
     if (!(localInp.date && localInp.time)) {
         errors.dateTime = 'Нужно указать дату И время'
         return false
@@ -119,13 +123,16 @@ onUnmounted(() => { //сброс интервала при закрытии ок
             <div class="mainField">
                 <div v-if="props.createOrEdit === 'create'">Создание задачи</div>
                 <div v-if="props.createOrEdit === 'edit'">Изменение задачи</div>
+
                 <Input typeIn="text" inputname="Название" v-model="localInp.name" :ifError="errors.name" />
                 <div>{{ errors.name }}</div>
                 <div>
                     <div>Дедлайн</div>
-                    <div>
-                        <input type="date" :min="dateForInput" v-model="localInp.date">
-                        <input type="time" v-model="localInp.time">
+                    <div class="dateTime">
+                        <Input typeIn="date" v-model="localInp.date" :ifError="errors.dateTime" />
+                        <Input typeIn="time" v-model="localInp.time" :ifError="errors.dateTime" />
+                        <!-- <input type="date" :min="dateForInput" v-model="localInp.date"> -->
+                        <!-- <input type="time" v-model="localInp.time"> -->
                     </div>
                     <div>{{ errors.dateTime }}</div>
                 </div>
@@ -137,6 +144,13 @@ onUnmounted(() => { //сброс интервала при закрытии ок
     </div>
 </template>
 <style scoped>
+.dateTime {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
 .container {
     display: flex;
     align-items: center;
@@ -167,7 +181,7 @@ onUnmounted(() => { //сброс интервала при закрытии ок
 .mainPart {
     width: 40%;
     height: 40%;
-    padding: 10%;
+    padding: 5%;
     animation-duration: 1s;
     animation-name: appearance;
 
@@ -217,7 +231,7 @@ onUnmounted(() => { //сброс интервала при закрытии ок
     to {
         width: 40%;
         height: 40%;
-        padding: 10%;
+        padding: 5%;
     }
 
 }
@@ -226,7 +240,7 @@ onUnmounted(() => { //сброс интервала при закрытии ок
     from {
         width: 40%;
         height: 40%;
-        padding: 10%;
+        padding: 5%;
 
     }
 
